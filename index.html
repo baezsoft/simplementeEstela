@@ -1,0 +1,46 @@
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" 
+  src="https://connect.facebook.net/es_LA/sdk.js#xfbml=1&version=v17.0">
+</script>
+
+<div id="live-container">
+  <!-- Aquí se insertará el embed si hay transmisión -->
+</div>
+
+<script>
+const PAGE_ID = 102392018140880;
+const ACCESS_TOKEN = 'EAAVZAshuwTAkBQZAfGFSpQsca4AHMldT82f0YbInZAdtFGMaTIx9qeR2HRrTI5VGMmzNlMbItJkqJ9QgDp5TQ3NZBEPilJCeSRbCTzXZBFZAsewxiZBezdUXXpnOHJILzczsNDGsGrYV6TdBa41jBOqvnI1YY7guPyKRrESgWYBeoL6sdrQi6tW8NPANeh7cCFgdEpRc8DASmip4s31BpdQIVple7LaYNZCfuExmimgn';
+
+async function mostrarLive() {
+  try {
+    const res = await fetch(`https://graph.facebook.com/v17.0/${PAGE_ID}/live_videos?fields=status,permalink_url&access_token=${ACCESS_TOKEN}`);
+    const data = await res.json();
+    
+    const liveVideo = data.data.find(v => v.status === 'LIVE');
+    
+    const container = document.getElementById('live-container');
+    container.innerHTML = ''; // Limpiar contenido previo
+
+    if(liveVideo) {
+      const embed = document.createElement('div');
+      embed.className = 'fb-video';
+      embed.setAttribute('data-href', liveVideo.permalink_url);
+      embed.setAttribute('data-width', '500');
+      embed.setAttribute('data-show-text', 'false');
+      container.appendChild(embed);
+
+      // Reconstruir plugins de FB
+      FB.XFBML.parse(container);
+    } else {
+      container.innerHTML = '<p>No hay transmisión en vivo</p>';
+    }
+
+  } catch (error) {
+    console.error('Error al obtener transmisión:', error);
+  }
+}
+
+// Llamar la función cada cierto tiempo (ej: 1 minuto)
+mostrarLive();
+setInterval(mostrarLive, 60000);
+</script>
